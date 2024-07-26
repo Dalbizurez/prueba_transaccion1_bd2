@@ -37,6 +37,21 @@ public class Transacciones {
             ui.btnCommit.setEnabled(true);
             ui.btnRollback.setEnabled(true);
         });
+        ui.btnCommit.addActionListener(e -> {
+            ui.btnCommit.setEnabled(false);
+            ui.btnRollback.setEnabled(false);
+            ui.btnGuardar.setEnabled(false);
+            ui.btnTelefono.setEnabled(false);
+            commit();
+        });
+        ui.btnRollback.addActionListener(e -> {
+            ui.btnCommit.setEnabled(false);
+            ui.btnRollback.setEnabled(false);
+            ui.btnGuardar.setEnabled(false);
+            ui.btnTelefono.setEnabled(false);
+            rollback();
+        });
+
         ui.btnGuardar.addActionListener(e -> {
             String nombre = ui.txtNombre.getText();
             String apellido = ui.txtApellido.getText();
@@ -110,5 +125,17 @@ public class Transacciones {
         } catch (SQLException e) {
             e.printStackTrace();
         }
+    }
+
+    private static void commit(){
+        Manager.commit();
+        verClientes();
+        verTelefonos();
+    }
+
+    private static void rollback(){
+        Manager.rollback();
+        verClientes();
+        verTelefonos();
     }
 }

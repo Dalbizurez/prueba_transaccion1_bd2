@@ -54,6 +54,11 @@ public class UI extends javax.swing.JFrame {
         jLabel10 = new javax.swing.JLabel();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
+        addWindowListener(new java.awt.event.WindowAdapter() {
+            public void windowClosing(java.awt.event.WindowEvent evt) {
+                close(evt);
+            }
+        });
 
         jLabel1.setText("Nombre");
 
@@ -300,6 +305,11 @@ public class UI extends javax.swing.JFrame {
 
         pack();
     }// </editor-fold>//GEN-END:initComponents
+
+    private void close(java.awt.event.WindowEvent evt) {//GEN-FIRST:event_close
+        // TODO add your handling code here:
+        DatabaseConnection.closeConnection();
+    }//GEN-LAST:event_close
 
     /**
      * @param args the command line arguments

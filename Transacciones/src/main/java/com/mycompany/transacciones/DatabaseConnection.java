@@ -8,6 +8,7 @@ public class DatabaseConnection {
     private static final String URL = "jdbc:mariadb://localhost:3306/transacciones?serverTimezone=UTC";
     private static final String USER = "root";
     private static final String PASSWORD = "root"; // Dani aqui tus credenciales de MariaDB <3
+    private static Connection conn;
 
     static {
         try {
@@ -18,6 +19,21 @@ public class DatabaseConnection {
     }
 
     public static Connection getConnection() throws SQLException {
-        return DriverManager.getConnection(URL, USER, PASSWORD);
+        if (conn == null || conn.isClosed()){
+            conn = DriverManager.getConnection(URL, USER, PASSWORD);
+            conn.setAutoCommit(false);
+        }
+        return conn;
+    }
+
+    public static void closeConnection() {
+        try {
+            if (conn != null){
+                conn.close();
+                System.out.println("Conexion cerrada");
+            }
+        } catch (Exception e) {
+        }
+
     }
 }

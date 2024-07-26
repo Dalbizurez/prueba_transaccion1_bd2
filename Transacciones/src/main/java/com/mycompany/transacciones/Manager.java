@@ -22,7 +22,8 @@ public class Manager {
     }
 
     public static ResultSet verClientes(){
-        try (Connection conn = DatabaseConnection.getConnection()) {
+        try {
+            Connection conn = DatabaseConnection.getConnection();
             Statement select = conn.createStatement();
             ResultSet result = select.executeQuery("SELECT * FROM Cliente");
             return result;
@@ -34,7 +35,8 @@ public class Manager {
     }
 
     public static ResultSet verTelefonos(){
-        try (Connection conn = DatabaseConnection.getConnection()) {
+        try {
+            Connection conn = DatabaseConnection.getConnection();
             Statement select = conn.createStatement();
             ResultSet result = select.executeQuery("SELECT * FROM Telefono");
             return result;
@@ -47,7 +49,8 @@ public class Manager {
     
 
     public static boolean insertarCliente(String nombre, String apellido, String direccion){
-        try (Connection conn = DatabaseConnection.getConnection()) {
+        try {
+            Connection conn = DatabaseConnection.getConnection();
             String insertClienteSQL = "INSERT INTO Cliente (nombre, apellido, direccion) VALUES (?, ?, ?)";
             PreparedStatement pstmt = conn.prepareStatement(insertClienteSQL);
             pstmt.setString(1, nombre);
@@ -62,7 +65,8 @@ public class Manager {
     }
 
     public static boolean insertarTelefono(String numero, int clienteId){
-        try (Connection conn = DatabaseConnection.getConnection()) {
+        try {
+            Connection conn = DatabaseConnection.getConnection();
             String insertTelefonoSQL = "INSERT INTO Telefono (numero, Cliente_id) VALUES (?, ?)";
             PreparedStatement pstmt = conn.prepareStatement(insertTelefonoSQL);
             pstmt.setString(1, numero);
@@ -74,4 +78,29 @@ public class Manager {
             return false;
         }
     }
+
+    public static boolean commit() {
+        try {
+            Connection conn = DatabaseConnection.getConnection();
+            conn.commit();
+        } catch (Exception e) {
+            // TODO: handle exception
+            e.printStackTrace();
+            return false;
+        }
+        return true;
+    }
+
+    public static boolean rollback(){
+        try {
+            Connection conn = DatabaseConnection.getConnection();
+            conn.rollback();
+        } catch (Exception e) {
+            // TODO: handle exception
+            e.printStackTrace();
+            return false;
+        }
+        return true;
+    }
+
 }
