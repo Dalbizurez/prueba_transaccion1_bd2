@@ -4,155 +4,106 @@
 
 package com.mycompany.transacciones;
 
-import java.awt.BorderLayout;
-import java.awt.FlowLayout;
-import java.awt.GridLayout;
-import java.awt.event.ActionEvent;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.Statement;
 
 import javax.swing.BorderFactory;
-import javax.swing.BoxLayout;
-import javax.swing.JButton;
-import javax.swing.JFrame;
-import javax.swing.JLabel;
-import javax.swing.JPanel;
-import javax.swing.JScrollPane;
-import javax.swing.JTextField;
-import javax.swing.SwingUtilities;
+import javax.swing.table.DefaultTableModel;
 /**
  *
  * @author Massielle
  */
 public class Transacciones {
-    private static int phoneInputCount = 0;
-    private static final JPanel phonePanel = new JPanel();
+    private static final UI ui = new UI();
 
     public static void main(String[] args) {
+        
+        setUpUi();
+        
+        
+    }
 
-        // Crear un cliente
-        Cliente cliente = new Cliente(0, "Juan", "Pérez");
+    private static void setUpUi(){
+        ui.setVisible(true);
+        verClientes();
+        verTelefonos();
+        ui.btnCommit.setEnabled(false);
+        ui.btnRollback.setEnabled(false);
+        ui.btnGuardar.setEnabled(false);
+        ui.btnTelefono.setEnabled(false);
 
-        // Crear un teléfono asociado al cliente
-        Telefono telefono = new Telefono(0, "123-456-7890", 0);
-
-        // Insertar cliente y teléfono en la base de datos
-        try (Connection conn = DatabaseConnection.getConnection()) {
-            // Insertar cliente y obtener el ID generado
-            String insertClienteSQL = "INSERT INTO Cliente (nombre, apellido) VALUES (?, ?)";
-            try (PreparedStatement pstmt = conn.prepareStatement(insertClienteSQL, Statement.RETURN_GENERATED_KEYS)) {
-                pstmt.setString(1, cliente.getNombre());
-                pstmt.setString(2, cliente.getApellido());
-                pstmt.executeUpdate();
-
-                // Obtener el ID del cliente insertado
-                try (ResultSet generatedKeys = pstmt.getGeneratedKeys()) {
-                    if (generatedKeys.next()) {
-                        int clienteId = generatedKeys.getInt(1);
-                        cliente.setId(clienteId); 
-                        telefono.setClienteId(clienteId); 
-                    } else {
-                        throw new SQLException("Failed to obtain client ID.");
-                    }
-                }
-            }
-
-            // Insertar teléfono
-            String insertTelefonoSQL = "INSERT INTO Telefono (numero, Cliente_id) VALUES (?, ?)";
-            try (PreparedStatement pstmt = conn.prepareStatement(insertTelefonoSQL)) {
-                pstmt.setString(1, telefono.getNumero());
-                pstmt.setInt(2, telefono.getClienteId());
-                pstmt.executeUpdate();
-            }
-
-            // Verificar los datos insertados
-            System.out.println("Clientes:");
-            try (Statement stmt = conn.createStatement();
-                 ResultSet rs = stmt.executeQuery("SELECT * FROM Cliente")) {
-                while (rs.next()) {
-                    System.out.println("ID: " + rs.getInt("id") +
-                                       ", Nombre: " + rs.getString("nombre") +
-                                       ", Apellido: " + rs.getString("apellido"));
-                }
-            }
-
-            System.out.println("\nTeléfonos:");
-            try (Statement stmt = conn.createStatement();
-                 ResultSet rs = stmt.executeQuery("SELECT * FROM Telefono")) {
-                while (rs.next()) {
-                    System.out.println("ID: " + rs.getInt("id") +
-                                       ", Número: " + rs.getString("numero") +
-                                       ", ClienteID: " + rs.getInt("Cliente_id"));
-                }
-            }
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-
-        SwingUtilities.invokeLater(() -> {
-            JFrame frame = new JFrame("Transacciones");
-            frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-            frame.setLayout(new BorderLayout());
-
-            JPanel inputPanel = new JPanel();
-            inputPanel.setLayout(new GridLayout(4, 2)); 
-
-            JTextField nombreField = new JTextField();
-            JTextField apellidoField = new JTextField();
-            JTextField direccionField = new JTextField();
-
-            inputPanel.add(new JLabel("Nombre:"));
-            inputPanel.add(nombreField);
-            inputPanel.add(new JLabel("Apellido:"));
-            inputPanel.add(apellidoField);
-            inputPanel.add(new JLabel("Dirección:"));
-            inputPanel.add(direccionField);
-
-            phonePanel.setLayout(new BoxLayout(phonePanel, BoxLayout.Y_AXIS));
-            JScrollPane phoneScrollPane = new JScrollPane(phonePanel);
-            phoneScrollPane.setBorder(BorderFactory.createTitledBorder("Números de Teléfono"));
-
-            JButton addPhoneButton = new JButton("Agregar Número");
-            addPhoneButton.addActionListener((ActionEvent e) -> {
-                addPhoneInput();
-            });
-
-            JPanel buttonPanel = new JPanel();
-            buttonPanel.setLayout(new FlowLayout(FlowLayout.RIGHT));
-
-            JButton buttonStart = new JButton("Comenzar Transaccion");
-            JButton buttonSave = new JButton("Guardar");
-            JButton buttonCommit = new JButton("Commit");
-            JButton buttonRollback = new JButton("Rollback");
-
-            buttonPanel.add(buttonStart);
-            buttonPanel.add(buttonSave);
-            buttonPanel.add(buttonCommit);
-            buttonPanel.add(buttonRollback);
-
-            JPanel southPanel = new JPanel();
-            southPanel.setLayout(new BorderLayout());
-            southPanel.add(addPhoneButton, BorderLayout.NORTH);
-            southPanel.add(buttonPanel, BorderLayout.SOUTH);
-
-            frame.add(inputPanel, BorderLayout.NORTH);
-            frame.add(phoneScrollPane, BorderLayout.CENTER);
-            frame.add(southPanel, BorderLayout.SOUTH);
-
-            frame.setSize(600, 400);
-            frame.setVisible(true);
+        ui.btnGuardar.addActionListener(e -> {
+            String nombre = ui.txtNombre.getText();
+            String apellido = ui.txtApellido.getText();
+            String direccion = ui.txtDireccion.getText();
+            insertarCliente(nombre, apellido, direccion);
+        });
+        ui.btnTelefono.addActionListener(e -> {
+            String numero = ui.txtTelefono.getText();
+            int clienteId = Integer.parseInt(ui.txtIdCliente.getText());
+            insertarTelefono(numero, clienteId);
+        });
+        ui.btnIniciar.addActionListener(e -> {
+            ui.btnCommit.setEnabled(true);
+            ui.btnRollback.setEnabled(true);
         });
     }
 
-    private static void addPhoneInput() {
-        phoneInputCount++;
-        JTextField phoneField = new JTextField(15);
-        phonePanel.add(new JLabel("Número de Teléfono " + phoneInputCount + ":"));
-        phonePanel.add(phoneField);
-        phonePanel.revalidate();
-        phonePanel.repaint();
+    private static void insertarCliente(String nombre, String apellido, String direccion) {
+        if (Manager.insertarCliente(nombre, apellido, direccion)){
+            ui.txtApellido.setText("");
+            ui.txtNombre.setText("");
+            ui.txtDireccion.setText("");
+            ui.txtNombre.setToolTipText("");
+            verClientes();
+            ui.tblClientes.changeSelection(ui.tblClientes.getRowCount() - 1, 0, false, false);
+        } else {
+            ui.txtNombre.setToolTipText("Error al insertar el cliente");
+        }
+    }
+
+    private static void insertarTelefono(String numero, int clienteId) {
+        if (Manager.insertarTelefono(numero, clienteId)){
+            ui.txtTelefono.setText("");
+            ui.txtTelefono.setToolTipText("");
+            ui.txtIdCliente.setText("");
+            verTelefonos();
+            ui.txtIdCliente.setBorder(BorderFactory.createLineBorder(java.awt.Color.BLACK));
+            ui.tblTelefonos.changeSelection(ui.tblTelefonos.getRowCount() - 1, 0, false, false);
+        } else {
+            ui.txtIdCliente.setToolTipText("Error al insertar el teléfono");
+            ui.txtIdCliente.setBorder(BorderFactory.createLineBorder(java.awt.Color.RED));
+
+        }
+    }
+
+    private static void verClientes() {
+        ResultSet clientes = Manager.verClientes();
+        try {
+            Object[] columns = {"ID", "Nombre", "Apellido"};
+            DefaultTableModel model = new DefaultTableModel(columns, 0);
+            while (clientes.next()) {
+                Object[] row = {clientes.getInt("id"), clientes.getString("nombre"), clientes.getString("apellido")};
+                model.addRow(row);
+            }
+            ui.tblClientes.setModel(model);
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private static void verTelefonos(){
+        ResultSet telefonos = Manager.verTelefonos();
+        try {
+            Object[] columns = {"ID", "Número", "ClienteID"};
+            DefaultTableModel model = new DefaultTableModel(columns, 0);
+            while (telefonos.next()) {
+                Object[] row = {telefonos.getInt("id"), telefonos.getString("numero"), telefonos.getInt("Cliente_id")};
+                model.addRow(row);
+            }
+            ui.tblTelefonos.setModel(model);
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
     }
 }
