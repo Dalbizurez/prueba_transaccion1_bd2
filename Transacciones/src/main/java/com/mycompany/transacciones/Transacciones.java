@@ -31,7 +31,12 @@ public class Transacciones {
         ui.btnRollback.setEnabled(false);
         ui.btnGuardar.setEnabled(false);
         ui.btnTelefono.setEnabled(false);
-
+        ui.btnIniciar.addActionListener(e -> {
+            ui.btnGuardar.setEnabled(true);
+            ui.btnTelefono.setEnabled(true);
+            ui.btnCommit.setEnabled(true);
+            ui.btnRollback.setEnabled(true);
+        });
         ui.btnGuardar.addActionListener(e -> {
             String nombre = ui.txtNombre.getText();
             String apellido = ui.txtApellido.getText();
