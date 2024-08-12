@@ -47,7 +47,8 @@ public class Manager {
         return null;
     }
     
-
+// Función para insertar clientes en la base de datos en base a parametros
+// Podría realizar uno para insertar según objeto
     public static boolean insertarCliente(String nombre, String apellido, String direccion){
         try {
             Connection conn = DatabaseConnection.getConnection();
@@ -83,6 +84,7 @@ public class Manager {
         try {
             Connection conn = DatabaseConnection.getConnection();
             conn.commit();
+            conn.setAutoCommit(true);
         } catch (Exception e) {
             // TODO: handle exception
             e.printStackTrace();
@@ -95,12 +97,23 @@ public class Manager {
         try {
             Connection conn = DatabaseConnection.getConnection();
             conn.rollback();
+            conn.setAutoCommit(true);
         } catch (Exception e) {
             // TODO: handle exception
             e.printStackTrace();
             return false;
         }
         return true;
+    }
+    
+    public static void start(int level){
+        try {
+            Connection conn = DatabaseConnection.getConnection();
+            conn.setAutoCommit(false);
+            conn.setTransactionIsolation(level);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
 }

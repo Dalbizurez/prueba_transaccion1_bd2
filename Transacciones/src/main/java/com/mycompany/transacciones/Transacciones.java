@@ -25,23 +25,34 @@ public class Transacciones {
 
     private static void setUpUi(){
         ui.setVisible(true);
-        verClientes();
-        verTelefonos();
         ui.btnCommit.setEnabled(false);
         ui.btnRollback.setEnabled(false);
         ui.btnGuardar.setEnabled(false);
         ui.btnTelefono.setEnabled(false);
+        
+        ui.buttonGroup1.setSelected(ui.radio_repeat.getModel(), true);
+                
         ui.btnIniciar.addActionListener(e -> {
             ui.btnGuardar.setEnabled(true);
             ui.btnTelefono.setEnabled(true);
             ui.btnCommit.setEnabled(true);
             ui.btnRollback.setEnabled(true);
+            ui.radio_committed.setEnabled(false);
+            ui.radio_uncommitted.setEnabled(false);
+            ui.radio_repeat.setEnabled(false);
+            ui.radio_serializable.setEnabled(false);
+            begin();
         });
         ui.btnCommit.addActionListener(e -> {
             ui.btnCommit.setEnabled(false);
             ui.btnRollback.setEnabled(false);
             ui.btnGuardar.setEnabled(false);
             ui.btnTelefono.setEnabled(false);
+            ui.radio_committed.setEnabled(true);
+            ui.radio_uncommitted.setEnabled(true);
+            ui.radio_repeat.setEnabled(true);
+            ui.radio_serializable.setEnabled(true);
+            ui.btnIniciar.setEnabled(true);
             commit();
         });
         ui.btnRollback.addActionListener(e -> {
@@ -49,6 +60,11 @@ public class Transacciones {
             ui.btnRollback.setEnabled(false);
             ui.btnGuardar.setEnabled(false);
             ui.btnTelefono.setEnabled(false);
+            ui.radio_committed.setEnabled(true);
+            ui.radio_uncommitted.setEnabled(true);
+            ui.radio_repeat.setEnabled(true);
+            ui.radio_serializable.setEnabled(true);
+            ui.btnIniciar.setEnabled(true);
             rollback();
         });
 
@@ -66,7 +82,17 @@ public class Transacciones {
         ui.btnIniciar.addActionListener(e -> {
             ui.btnCommit.setEnabled(true);
             ui.btnRollback.setEnabled(true);
+            ui.btnIniciar.setEnabled(false);
         });
+        
+        ui.btnActualizar.addActionListener(e -> {
+            verClientes();
+            verTelefonos();
+        });
+        
+        verClientes();
+        verTelefonos();
+
     }
 
     private static void insertarCliente(String nombre, String apellido, String direccion) {
@@ -137,5 +163,17 @@ public class Transacciones {
         Manager.rollback();
         verClientes();
         verTelefonos();
+    }
+    
+    private static void begin(){
+        int level = 4;
+        if (ui.buttonGroup1.isSelected(ui.radio_uncommitted.getModel())){
+            level = 1;
+        } else if (ui.buttonGroup1.isSelected(ui.radio_committed.getModel())) {
+            level = 2;
+        }  else if (ui.buttonGroup1.isSelected(ui.radio_serializable.getModel())) {
+            level = 8;
+        }
+        Manager.start(level);
     }
 }

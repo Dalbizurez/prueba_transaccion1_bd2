@@ -21,7 +21,6 @@ public class DatabaseConnection {
     public static Connection getConnection() throws SQLException {
         if (conn == null || conn.isClosed()){
             conn = DriverManager.getConnection(URL, USER, PASSWORD);
-            conn.setAutoCommit(false);
         }
         return conn;
     }
