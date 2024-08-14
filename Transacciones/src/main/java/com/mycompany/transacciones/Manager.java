@@ -80,6 +80,28 @@ public class Manager {
         }
     }
 
+    public static boolean actualizarCliente(int id, String nombre, String apellido, String direccion) {
+        try {
+            Connection conn = DatabaseConnection.getConnection();
+            
+            String updateClienteSQL = "UPDATE Cliente SET nombre = ?, apellido = ?, direccion = ? WHERE id = ?";
+            
+            PreparedStatement pstmt = conn.prepareStatement(updateClienteSQL);
+            
+            pstmt.setString(1, nombre);
+            pstmt.setString(2, apellido);
+            pstmt.setString(3, direccion);
+            pstmt.setInt(4, id);
+            
+            pstmt.executeUpdate();
+            
+            return true;
+        } catch (SQLException e) {
+            System.out.println("Error: " + e.getMessage());
+            return false;
+        }
+    }    
+
     public static boolean commit() {
         try {
             Connection conn = DatabaseConnection.getConnection();
