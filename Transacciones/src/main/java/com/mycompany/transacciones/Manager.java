@@ -100,6 +100,42 @@ public class Manager {
             System.out.println("Error: " + e.getMessage());
             return false;
         }
+    }   
+    
+    public static boolean actualizarTelefono(int idTelefono, String numero, int clienteId) {
+        try {
+            Connection conn = DatabaseConnection.getConnection();
+            String updateTelefonoSQL = "UPDATE Telefono SET numero = ?, cliente_id = ? WHERE id = ?";
+            PreparedStatement pstmt = conn.prepareStatement(updateTelefonoSQL);
+            pstmt.setString(1, numero);
+            pstmt.setInt(2, clienteId);
+            pstmt.setInt(3, idTelefono);
+            
+            int rowsAffected = pstmt.executeUpdate();
+            return rowsAffected > 0;
+        } catch (SQLException e) {
+            System.out.println("Error: " + e.getMessage());
+            return false;
+        }
+    }
+    
+    public static boolean existeCliente(int clienteId) {
+        try {
+            Connection conn = DatabaseConnection.getConnection();
+            String queryClienteSQL = "SELECT COUNT(*) FROM Cliente WHERE id = ?";
+            PreparedStatement pstmt = conn.prepareStatement(queryClienteSQL);
+            pstmt.setInt(1, clienteId);
+            
+            ResultSet rs = pstmt.executeQuery();
+            if (rs.next()) {
+                int count = rs.getInt(1);
+                return count > 0;
+            }
+            return false;
+        } catch (SQLException e) {
+            System.out.println("Error: " + e.getMessage());
+            return false;
+        }
     }    
 
     public static boolean commit() {

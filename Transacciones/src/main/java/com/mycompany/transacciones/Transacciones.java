@@ -102,6 +102,14 @@ public class Transacciones {
 
         ui.jButton1.addActionListener(e -> actualizarCliente());
 
+        ui.tblTelefonos.getSelectionModel().addListSelectionListener(e -> {
+            if (!e.getValueIsAdjusting()){
+                handleTelefonoSelection();
+            }
+        });
+
+        ui.jButton2.addActionListener(e -> actualizarTelefono());
+
         verClientes();
         verTelefonos();
 
@@ -118,9 +126,6 @@ public class Transacciones {
             ui.txtNombre.setText(nombre);
             ui.txtApellido.setText(apellido);
 
-            int clienteId = id;
-            String clienteNombre = nombre;
-            String clienteApellido = apellido;
         }
     }
 
@@ -133,6 +138,9 @@ public class Transacciones {
 
             if (Manager.actualizarCliente(id, nombre, apellido, direccion)) {
                 System.out.println("Cliente actualizado exitosamente");
+                ui.txtIdCliente.setText("");
+                ui.txtNombre.setText("");
+                ui.txtApellido.setText("");
                 verClientes(); 
             } else {
                 System.out.println("Error al actualizar el cliente");
@@ -142,6 +150,43 @@ public class Transacciones {
         }
 
     }
+
+    private static void handleTelefonoSelection() {
+        int selectedRow = ui.tblTelefonos.getSelectedRow(); 
+        if (selectedRow >= 0) { 
+            int id = Integer.parseInt(ui.tblTelefonos.getValueAt(selectedRow, 0).toString());
+            String telefono = ui.tblTelefonos.getValueAt(selectedRow, 1).toString();
+
+            ui.txtIdCliente.setText(String.valueOf(id));
+            ui.txtTelefono.setText(telefono);
+
+        }
+    }
+
+    private static void actualizarTelefono() {
+        try {
+            // Obtener el ID del teléfono directamente desde la selección de la tabla
+            int idTelefono = Integer.parseInt(ui.tblTelefonos.getValueAt(ui.tblTelefonos.getSelectedRow(), 0).toString());
+            String numero = ui.txtTelefono.getText();
+            int clienteId = Integer.parseInt(ui.txtIdCliente.getText());
+            
+            if (Manager.existeCliente(clienteId)) {
+                if (Manager.actualizarTelefono(idTelefono, numero, clienteId)) {
+                    ui.txtTelefono.setText("");
+                    ui.txtIdCliente.setText("");
+                    
+                    verTelefonos();
+                } else {
+                    ui.txtTelefono.setToolTipText("Error al actualizar el teléfono");
+                }
+            } else {
+                ui.txtIdCliente.setToolTipText("ID de cliente inválido");
+            }
+        } catch (NumberFormatException e) {
+            ui.txtIdCliente.setToolTipText("ID inválido");
+        }
+    }    
+
 
     private static void insertarCliente(String nombre, String apellido, String direccion) {
         if (Manager.insertarCliente(nombre, apellido, direccion)) {
