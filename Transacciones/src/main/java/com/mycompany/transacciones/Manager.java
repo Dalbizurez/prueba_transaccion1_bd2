@@ -102,6 +102,44 @@ public class Manager {
         }
     }   
     
+    public static boolean borrarCliente(int id){
+        try {
+            Connection conn = DatabaseConnection.getConnection();
+            
+            String deleteClienteSQL = "DELETE FROM Cliente WHERE id = ?";
+            
+            PreparedStatement pstmt = conn.prepareStatement(deleteClienteSQL);
+           
+            pstmt.setInt(1, id);
+            
+            pstmt.execute();
+            
+            return true;
+        } catch (SQLException e) {
+            System.out.println("Error: " + e.getMessage());
+            return false;
+        }
+    }
+    
+        public static boolean borrarTelefono(int id){
+        try {
+            Connection conn = DatabaseConnection.getConnection();
+            
+            String deleteTelSQL = "DELETE FROM Telefono WHERE Cliente_Id = ?";
+            
+            PreparedStatement pstmt = conn.prepareStatement(deleteTelSQL);
+           
+            pstmt.setInt(1, id);
+            
+            pstmt.execute();
+            
+            return true;
+        } catch (SQLException e) {
+            System.out.println("Error: " + e.getMessage());
+            return false;
+        }
+    }
+    
     public static boolean actualizarTelefono(int idTelefono, String numero, int clienteId) {
         try {
             Connection conn = DatabaseConnection.getConnection();

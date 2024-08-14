@@ -31,6 +31,7 @@ public class Transacciones {
         ui.btnTelefono.setEnabled(false);
         ui.jButton1.setEnabled(false);
         ui.jButton2.setEnabled(false);
+        ui.btn_delete.setEnabled(false);
 
         ui.buttonGroup1.setSelected(ui.radio_repeat.getModel(), true);
 
@@ -45,6 +46,7 @@ public class Transacciones {
             ui.radio_serializable.setEnabled(false);
             ui.jButton1.setEnabled(true);
             ui.jButton2.setEnabled(true);
+            ui.btn_delete.setEnabled(true);
             begin();
         });
         ui.btnCommit.addActionListener(e -> {
@@ -57,6 +59,7 @@ public class Transacciones {
             ui.radio_repeat.setEnabled(true);
             ui.radio_serializable.setEnabled(true);
             ui.btnIniciar.setEnabled(true);
+            ui.btn_delete.setEnabled(false);
             commit();
         });
         ui.btnRollback.addActionListener(e -> {
@@ -69,6 +72,7 @@ public class Transacciones {
             ui.radio_repeat.setEnabled(true);
             ui.radio_serializable.setEnabled(true);
             ui.btnIniciar.setEnabled(true);
+            ui.btn_delete.setEnabled(false);
             rollback();
         });
 
@@ -87,6 +91,9 @@ public class Transacciones {
             ui.btnCommit.setEnabled(true);
             ui.btnRollback.setEnabled(true);
             ui.btnIniciar.setEnabled(false);
+        });
+        ui.btn_delete.addActionListener(e -> {
+            borrarCliente();
         });
 
         ui.btnActualizar.addActionListener(e -> {
@@ -150,7 +157,24 @@ public class Transacciones {
         }
 
     }
-
+    
+    private static void borrarCliente(){
+        try {
+            int id = Integer.parseInt(ui.txtIdCliente.getText());
+            if (Manager.borrarTelefono(id) && Manager.borrarCliente(id)) {
+                System.out.println("Cliente eliminado");
+                ui.txtIdCliente.setText("");
+                ui.txtNombre.setText("");
+                ui.txtApellido.setText("");
+                verClientes(); 
+            } else {
+                System.out.println("Error al eliminar el cliente");
+            }
+        } catch (NumberFormatException e) {
+            System.out.println("ID inválido");
+        }
+    }
+    
     private static void handleTelefonoSelection() {
         int selectedRow = ui.tblTelefonos.getSelectedRow(); 
         if (selectedRow >= 0) { 
