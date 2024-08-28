@@ -292,5 +292,6 @@ public class Transacciones {
             level = 8;
         }
         Manager.start(level);
+        DatabaseConnection.backup();
     }
 }

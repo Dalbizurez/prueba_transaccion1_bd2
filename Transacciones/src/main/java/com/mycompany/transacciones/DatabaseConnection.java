@@ -1,5 +1,7 @@
 package com.mycompany.transacciones;
 
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
@@ -35,4 +37,38 @@ public class DatabaseConnection {
         }
 
     }
+    
+    public static void backup(){
+        String host = "localhost";
+        String database = "transacciones";
+        String file_path = "C:\\Users\\DANIEL\\Documents\\GitHub\\BD2\\transbackuptest.sql";
+        String command = "mariadb-dump -u %s -p %s --add-drop-database -B %s > %s";
+        try {
+            ProcessBuilder builder = new ProcessBuilder("cmd", "/c", "mariadb-dump -u "+ USER + " -p" + PASSWORD + " --add-drop-database" + " -B " + database + " -r " + file_path);
+            builder.redirectErrorStream(true);
+        
+            Process backup = builder.start();
+            System.out.println(builder.command());
+
+            
+            BufferedReader reader = new BufferedReader(new InputStreamReader(backup.getInputStream()));
+            String line;
+            while ((line = reader.readLine()) != null) {
+                System.out.println(line);
+            }
+            
+            int exitCode = backup.waitFor();
+            if (exitCode == 0) {
+                System.out.println("Exportación completada con éxito.");
+            } else {
+                System.err.println("Error en la exportación. Código de salida: " + exitCode);
+            }
+            
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        
+    }
+    
 }
