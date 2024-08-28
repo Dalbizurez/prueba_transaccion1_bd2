@@ -7,7 +7,8 @@ import java.sql.DriverManager;
 import java.sql.SQLException;
 
 public class DatabaseConnection {
-    private static final String URL = "jdbc:mariadb://localhost:3306/transacciones?serverTimezone=UTC";
+    public static final String DB = "transacciones";
+    private static final String URL = "jdbc:mariadb://localhost:3306/"+DB+"?serverTimezone=UTC";
     private static final String USER = "root";
     private static final String PASSWORD = "root"; // Dani aqui tus credenciales de MariaDB <3
     private static Connection conn;

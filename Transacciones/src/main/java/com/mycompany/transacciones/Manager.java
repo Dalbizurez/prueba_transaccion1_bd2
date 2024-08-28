@@ -208,8 +208,19 @@ public class Manager {
             conn.setAutoCommit(false);
             conn.setTransactionIsolation(level);
         } catch (Exception e) {
+            DatabaseConnection.closeConnection();
             e.printStackTrace();
         }
     }
 
+    public static void drop(){
+        try {
+            Connection conn = DatabaseConnection.getConnection();
+            Statement statement = conn.createStatement();
+            statement.execute("DROP DATABASE " + DatabaseConnection.DB);
+            System.out.println("Base de datos eliminada");
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
 }
