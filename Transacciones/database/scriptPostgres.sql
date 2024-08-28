@@ -18,3 +18,6 @@ CREATE TABLE telefono (
     number VARCHAR(20) NOT NULL,
     cliente_id INT REFERENCES cliente(id) ON DELETE CASCADE
 );
+
+
+-- psql -U postgres -h localhost -d postgres
