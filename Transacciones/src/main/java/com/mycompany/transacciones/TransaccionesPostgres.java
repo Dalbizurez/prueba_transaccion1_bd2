@@ -4,10 +4,12 @@
 package com.mycompany.transacciones;
 
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.Map;
 
 import javax.swing.BorderFactory;
 import javax.swing.table.DefaultTableModel;
@@ -35,6 +37,9 @@ public class TransaccionesPostgres {
         ui.jButton1.setEnabled(false);
         ui.jButton2.setEnabled(false);
         ui.btn_delete.setEnabled(false);
+        ui.deleteDBButton.setEnabled(false);
+        ui.importButton.setEnabled(false);
+        ui.exportButton.setEnabled(false);
 
         ui.buttonGroup1.setSelected(ui.radio_repeat.getModel(), true);
 
@@ -50,6 +55,9 @@ public class TransaccionesPostgres {
             ui.jButton1.setEnabled(true);
             ui.jButton2.setEnabled(true);
             ui.btn_delete.setEnabled(true);
+            ui.deleteDBButton.setEnabled(true);
+            ui.importButton.setEnabled(true);
+            ui.exportButton.setEnabled(true);
             begin();
         });
         ui.btnCommit.addActionListener(e -> {
@@ -122,6 +130,21 @@ public class TransaccionesPostgres {
 
         verClientes();
         verTelefonos();
+
+        String fileName = "backup.sql";
+        String desktopPath = TransaccionesPostgres.getDesktopPath(fileName);
+
+        ui.deleteDBButton.addActionListener(e -> {
+            deleteDatabase();
+        });
+
+        ui.exportButton.addActionListener(e -> {
+            TransaccionesPostgres.exportDatabase(desktopPath);
+        });
+
+        ui.importButton.addActionListener(e -> {
+            TransaccionesPostgres.importDatabase(desktopPath);
+        });
 
     }
 
@@ -298,19 +321,22 @@ public class TransaccionesPostgres {
 
     public static void exportDatabase(String filePath) {
         try {
-            String dumpCommand = "pg_dump -U postgres -h localhost -d transacciones -f " + filePath;
-
-            ProcessBuilder processBuilder = new ProcessBuilder("/bin/sh", "-c", dumpCommand);
+            ProcessBuilder processBuilder = new ProcessBuilder("cmd.exe", "/c", "pg_dump -U postgres -h localhost -d transacciones -f \"" + filePath + "\"");
+            Map<String, String> environment = processBuilder.environment();
+            environment.put("PGPASSWORD", "root");
             processBuilder.redirectErrorStream(true);
 
+            // Iniciar el proceso
             Process process = processBuilder.start();
 
+            // Leer la salida del proceso
             BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()));
             String line;
             while ((line = reader.readLine()) != null) {
-                System.out.println(line);
+                System.out.println("Salida del proceso: " + line);
             }
 
+            // Esperar a que el proceso termine y verificar el código de salida
             int exitCode = process.waitFor();
             if (exitCode == 0) {
                 System.out.println("Exportación completada con éxito.");
@@ -325,19 +351,26 @@ public class TransaccionesPostgres {
 
     public static void importDatabase(String filePath) {
         try {
-            String importCommand = "psql -U postgres -h localhost -d transacciones -f " + filePath;
-    
-            ProcessBuilder processBuilder = new ProcessBuilder("/bin/sh", "-c", importCommand);
+            // Comando para importar la base de datos
+            String importCommand = "psql -U postgres -h localhost -d transacciones -f \"" + filePath + "\"";
+            
+            // Configurar el ProcessBuilder
+            ProcessBuilder processBuilder = new ProcessBuilder("cmd.exe", "/c", importCommand);
+            Map<String, String> environment = processBuilder.environment();
+            environment.put("PGPASSWORD", "root");
             processBuilder.redirectErrorStream(true);
     
+            // Iniciar el proceso
             Process process = processBuilder.start();
     
+            // Leer la salida del proceso
             BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()));
             String line;
             while ((line = reader.readLine()) != null) {
-                System.out.println(line);
+                System.out.println("Salida del proceso: " + line);
             }
     
+            // Esperar a que el proceso termine y verificar el código de salida
             int exitCode = process.waitFor();
             if (exitCode == 0) {
                 System.out.println("Importación completada con éxito.");
@@ -348,32 +381,71 @@ public class TransaccionesPostgres {
         } catch (IOException | InterruptedException e) {
             e.printStackTrace();
         }
-    }
+    }    
     
+    public static String getDesktopPath(String fileName) {
+        String userHome = System.getProperty("user.home");
+        return userHome + File.separator + "Desktop" + File.separator + fileName;
+    }
+
     public static void deleteDatabase() {
         try {
-            String dropCommand = "dropdb -U [postgres] -h localhost transacciones";
+            // Comando para terminar las conexiones activas a la base de datos
+            String terminateConnections = "psql -U postgres -h localhost -c \"SELECT pg_terminate_backend(pid) FROM pg_stat_activity WHERE datname = 'transacciones' AND pid <> pg_backend_pid();\"";
+            
+            // Comando para eliminar la base de datos
+            String dropCommand = "dropdb -U postgres -h localhost transacciones";
     
-            ProcessBuilder processBuilder = new ProcessBuilder("/bin/sh", "-c", dropCommand);
-            processBuilder.redirectErrorStream(true);
+            // Configurar el ProcessBuilder para terminar las conexiones
+            ProcessBuilder terminateProcessBuilder = new ProcessBuilder("cmd.exe", "/c", terminateConnections);
+            Map<String, String> environment = terminateProcessBuilder.environment();
+            environment.put("PGPASSWORD", "root");
+            terminateProcessBuilder.redirectErrorStream(true);
     
-            Process process = processBuilder.start();
+            // Iniciar el proceso para terminar las conexiones
+            Process terminateProcess = terminateProcessBuilder.start();
     
-            BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()));
-            String line;
-            while ((line = reader.readLine()) != null) {
-                System.out.println(line);
+            // Leer la salida del proceso
+            BufferedReader terminateReader = new BufferedReader(new InputStreamReader(terminateProcess.getInputStream()));
+            String terminateLine;
+            while ((terminateLine = terminateReader.readLine()) != null) {
+                System.out.println("Salida del proceso (terminar conexiones): " + terminateLine);
             }
     
-            int exitCode = process.waitFor();
-            if (exitCode == 0) {
-                System.out.println("Base de datos eliminada con éxito.");
+            // Esperar a que el proceso termine y verificar el código de salida
+            int terminateExitCode = terminateProcess.waitFor();
+            if (terminateExitCode == 0) {
+                System.out.println("Conexiones activas terminadas con éxito.");
+    
+                // Configurar el ProcessBuilder para eliminar la base de datos
+                ProcessBuilder dropProcessBuilder = new ProcessBuilder("cmd.exe", "/c", dropCommand);
+                dropProcessBuilder.environment().put("PGPASSWORD", "root");
+                dropProcessBuilder.redirectErrorStream(true);
+    
+                // Iniciar el proceso para eliminar la base de datos
+                Process dropProcess = dropProcessBuilder.start();
+    
+                // Leer la salida del proceso
+                BufferedReader dropReader = new BufferedReader(new InputStreamReader(dropProcess.getInputStream()));
+                String dropLine;
+                while ((dropLine = dropReader.readLine()) != null) {
+                    System.out.println("Salida del proceso (eliminar base de datos): " + dropLine);
+                }
+    
+                // Esperar a que el proceso termine y verificar el código de salida
+                int dropExitCode = dropProcess.waitFor();
+                if (dropExitCode == 0) {
+                    System.out.println("Base de datos eliminada con éxito.");
+                } else {
+                    System.err.println("Error al eliminar la base de datos. Código de salida: " + dropExitCode);
+                }
             } else {
-                System.err.println("Error al eliminar la base de datos. Código de salida: " + exitCode);
+                System.err.println("Error al terminar las conexiones activas. Código de salida: " + terminateExitCode);
             }
     
         } catch (IOException | InterruptedException e) {
             e.printStackTrace();
         }
-    }    
+    }
+    
 }
