@@ -93,6 +93,15 @@ public class DatabaseConnection {
         } catch (Exception e) {
             // TODO: handle exception
             e.printStackTrace();
+        } finally   {
+            try {
+                if (!conn.isClosed()) {
+                    conn.setCatalog(DB);
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+
         }
 
         

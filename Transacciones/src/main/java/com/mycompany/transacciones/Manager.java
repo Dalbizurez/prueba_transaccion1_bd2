@@ -29,6 +29,7 @@ public class Manager {
             return result;
         } catch (Exception e) {
             // TODO: handle exception
+            e.printStackTrace();
             System.out.println("Error: " + e.getMessage());
         }
         return null;
@@ -42,6 +43,7 @@ public class Manager {
             return result;
         } catch (Exception e) {
             // TODO: handle exception
+            e.printStackTrace();
             System.out.println("Error: " + e.getMessage());
         }
         return null;
