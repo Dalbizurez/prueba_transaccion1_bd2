@@ -291,7 +291,8 @@ public class Transacciones {
         } else if (ui.buttonGroup1.isSelected(ui.radio_serializable.getModel())) {
             level = 8;
         }
+        DatabaseConnection.restore();
         Manager.start(level);
-        DatabaseConnection.backup();
+
     }
 }

@@ -71,4 +71,27 @@ public class DatabaseConnection {
         
     }
     
+    public static void restore(){
+        String host = "localhost";
+        String database = "transacciones";
+        String file_path = "C:\\Users\\DANIEL\\Documents\\GitHub\\BD2\\transbackuptest.sql";
+        String command = "mariadb -u root -p"+PASSWORD + " < " + file_path;
+
+        try {
+            ProcessBuilder builder = new ProcessBuilder("cmd", "/c", command);
+            Process restore = builder.start();
+
+            int exitCode = restore.waitFor();
+            if (exitCode == 0) {
+                System.out.println("Restauración completada con éxito.");
+            } else {
+                System.err.println("Error en la exportación. Código de salida: " + exitCode);
+            }
+        } catch (Exception e) {
+            // TODO: handle exception
+            e.printStackTrace();
+        }
+
+        
+    }
 }
