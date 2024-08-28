@@ -254,25 +254,26 @@ public class Transacciones {
 
     private static void verClientes() {
         ResultSet clientes = Manager.verClientes();
+        Object[] columns = {"ID", "Nombre", "Apellido"};
+        DefaultTableModel model = new DefaultTableModel(columns, 0);
         try {
-            Object[] columns = {"ID", "Nombre", "Apellido"};
-            DefaultTableModel model = new DefaultTableModel(columns, 0);
-            while (clientes.next()) {
+            while (clientes != null && clientes.next()) {
                 Object[] row = {clientes.getInt("id"), clientes.getString("nombre"), clientes.getString("apellido")};
                 model.addRow(row);
             }
-            ui.tblClientes.setModel(model);
         } catch (SQLException e) {
             e.printStackTrace();
         }
+        ui.tblClientes.setModel(model);
     }
 
     private static void verTelefonos() {
         ResultSet telefonos = Manager.verTelefonos();
+        Object[] columns = {"ID", "Número", "ClienteID"};
+        DefaultTableModel model = new DefaultTableModel(columns, 0);
         try {
-            Object[] columns = {"ID", "Número", "ClienteID"};
-            DefaultTableModel model = new DefaultTableModel(columns, 0);
-            while (telefonos.next()) {
+
+            while (telefonos != null && telefonos.next()) {
                 Object[] row = {telefonos.getInt("id"), telefonos.getString("numero"), telefonos.getInt("Cliente_id")};
                 model.addRow(row);
             }
